@@ -42,7 +42,6 @@ public class MyGgame extends ApplicationAdapter {
 		float scalar = v1.dot(v2);
 		System.out.println("Угол между v1 и v2: " + Math.acos(scalar));
 
-
 		float l = v1.len();
 
 		Vector2 v3 = v1.cpy().add(v2);
