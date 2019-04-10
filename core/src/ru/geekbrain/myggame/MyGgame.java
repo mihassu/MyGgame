@@ -9,10 +9,10 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
 public class MyGgame extends ApplicationAdapter {
-	SpriteBatch batch;
-	Texture img;
-	Texture background;
-	TextureRegion region;
+    private SpriteBatch batch;
+	private Texture img;
+    private Texture background;
+    private TextureRegion region;
 
 	//занимается инициализацией проекта, срабатывает при запуске проекта.
 	@Override
