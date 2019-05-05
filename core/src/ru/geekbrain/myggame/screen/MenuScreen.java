@@ -43,13 +43,14 @@ public class MenuScreen extends BaseScreen{
     public void render(float delta) {
         super.render(delta);
 //        v.scl(a); // с ускорением почему то картинка не всегда останавоивается в точке
-        buffer.set(touch);
+        buffer.set(touch); //назначаем временный вектор, чтобы не копирвать touch
 
-        if(buffer.sub(pos).len() > 0.5f) {
-            pos.add(v);
+        if(buffer.sub(pos).len() > 0.5f) { //сравниваем расстояние до назначенной точки с
+            // длиной вектора скорости, длину которого установили 0.5f
+            pos.add(v); // если оно большеЮ то продолжаем двигаться
 
         } else {
-            pos.set(touch);
+            pos.set(touch); // если нет, то устанавливаем картинку в назначенную точку
         }
 
 //        pos.add(v);
