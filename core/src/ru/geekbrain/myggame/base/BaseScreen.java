@@ -5,13 +5,27 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Matrix3;
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector2;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import ru.geekbrain.myggame.math.MatrixUtil;
+import ru.geekbrain.myggame.math.Rect;
+
 public class BaseScreen implements Screen, InputProcessor {
 
     protected SpriteBatch batch;
+    private Vector2 touch;
+
+    protected Rect worldBounds;
+    private Rect screenBounds;
+    private Rect glBounds; //прямоуголиник в координатах openGL размером 2fx2f
+
+    private Matrix4 worldToGL;
+    private Matrix3 screenToWorld;
 
     private static final Logger logger = Logger.getLogger(Screen.class.getName());
 
@@ -21,6 +35,12 @@ public class BaseScreen implements Screen, InputProcessor {
         logger.log(Level.SEVERE,"show()");
         Gdx.input.setInputProcessor(this); //назначаем процессор ввода - нащ экран
         batch = new SpriteBatch();
+        worldBounds = new Rect();
+        screenBounds = new Rect();
+        glBounds = new Rect(0, 0, 1f, 1f);
+        worldToGL = new Matrix4();
+        screenToWorld = new Matrix3();
+        touch = new Vector2();
     }
 
     @Override
@@ -32,6 +52,23 @@ public class BaseScreen implements Screen, InputProcessor {
     @Override
     public void resize(int width, int height) {
         logger.log(Level.SEVERE,"resize(): width - " + width + ", height - " + height);
+        screenBounds.setSize(width, height);
+        screenBounds.setLeft(0);
+        screenBounds.setBottom(0);
+
+        float aspect = (float) width / height;
+        worldBounds.setHeight(2f);
+        worldBounds.setWidth(2f * aspect);
+
+        MatrixUtil.calcTransitionMatrix(worldToGL, worldBounds, glBounds); //считаем матрицу
+        batch.setProjectionMatrix(worldToGL); //передаем ее в batch
+
+        MatrixUtil.calcTransitionMatrix(screenToWorld, screenBounds, worldBounds);
+        resize(worldBounds);
+    }
+
+    public void resize(Rect worldBounds) {
+
     }
 
     @Override
@@ -79,14 +116,19 @@ public class BaseScreen implements Screen, InputProcessor {
 
     @Override // кнопка мыши нажата
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        logger.log(Level.SEVERE,"touchDown(): " + " x: " + screenX+ " y: " + screenY +
+        logger.log(Level.SEVERE," x: " + screenX+ "px, y: " + screenY + "px" +
                 " pointer: " + pointer + " button: " + button);
+
+        touch.set(screenX, screenBounds.getHeight() - screenY);
+        touch.mul(screenToWorld);
+
+        logger.log(Level.SEVERE, "x: " + touch.x + " y: " + touch.y);
         return false;
     }
 
     @Override //кнопка мыши отпущена
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        logger.log(Level.SEVERE,"touchUp()");
+//        logger.log(Level.SEVERE,"touchUp()");
         return false;
     }
 
