@@ -6,7 +6,9 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 
 
+
 import ru.geekbrain.myggame.base.BaseScreen;
+
 
 public class MenuScreen extends BaseScreen{
     private Texture img;
@@ -14,11 +16,14 @@ public class MenuScreen extends BaseScreen{
     private Vector2 touch;
     private Vector2 pos;
     private Vector2 v;
+    private Vector2 buffer;
     private float a;
     private final Vector2 up = new Vector2(0,1);
     private final Vector2 down = new Vector2(0,-1);
     private final Vector2 left = new Vector2(-1,0);
     private final Vector2 right = new Vector2(1,0);
+
+
 
 
     @Override
@@ -29,6 +34,7 @@ public class MenuScreen extends BaseScreen{
         touch = new Vector2();
         pos = new Vector2(20, 20);
         v = new Vector2();
+        buffer = new Vector2();
 
     }
 
@@ -37,7 +43,17 @@ public class MenuScreen extends BaseScreen{
     public void render(float delta) {
         super.render(delta);
 //        v.scl(a); // с ускорением почему то картинка не всегда останавоивается в точке
-        pos.add(v);
+        buffer.set(touch);
+
+        if(buffer.sub(pos).len() > 0.5f) {
+            pos.add(v);
+
+        } else {
+            pos.set(touch);
+        }
+
+//        pos.add(v);
+
         batch.begin();
         batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 //        batch.setColor(0.454f, 0.32f, 0.68f, 0.8f); //установить фон и прозразность
@@ -69,11 +85,11 @@ public class MenuScreen extends BaseScreen{
             pos.set(0, pos.y);
         }
 
-        if((Math.abs(touch.x - pos.x) < 1) && (Math.abs(touch.y - pos.y) < 1)){
-            System.out.println("Картинка в точке");
-            v.setZero();
-            touch.set(-100,-100); //чтобы остановить срабатывание условия
-        }
+//        if((Math.abs(touch.x - pos.x) < 1) && (Math.abs(touch.y - pos.y) < 1)){
+//            System.out.println("Картинка в точке");
+//            v.setZero();
+//            touch.set(-100,-100); //чтобы остановить срабатывание условия
+//        }
     }
 
     @Override
@@ -87,7 +103,8 @@ public class MenuScreen extends BaseScreen{
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         touch.set(screenX, Gdx.graphics.getBackBufferHeight() - screenY);
         v.set(touch.cpy().sub(pos)); //определяем вектор направления на точку
-        v.nor(); // нормирование
+        v.setLength(0.5f);
+//        v.nor(); // нормирование
         a = 1.05f;
         return false;
     }
