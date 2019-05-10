@@ -3,6 +3,7 @@ package ru.geekbrain.myggame.screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
@@ -10,6 +11,7 @@ import ru.geekbrain.myggame.base.BaseScreen;
 import ru.geekbrain.myggame.math.Rect;
 import ru.geekbrain.myggame.sprite.Background;
 import ru.geekbrain.myggame.sprite.Logo;
+import ru.geekbrain.myggame.sprite.Star;
 
 
 public class MenuScreen extends BaseScreen{
@@ -17,6 +19,9 @@ public class MenuScreen extends BaseScreen{
     private Texture log;
     private Background background;
     private Logo logo;
+    private TextureAtlas atlas;
+    private Star[] stars;
+    private final int STARS_COUNT = 100;
 
 
     @Override
@@ -28,18 +33,37 @@ public class MenuScreen extends BaseScreen{
 
         log = new Texture("kot3.jpg");
         logo = new Logo(new TextureRegion(log));
+        atlas = new TextureAtlas("textures/menuAtlas.tpack");
+
+        stars = new Star[STARS_COUNT];
+        for (int i = 0; i < stars.length; i++) {
+            stars[i] = new Star(atlas);
+        }
     }
 
 
     @Override
     public void render(float delta) {
         super.render(delta);
+        update(delta);
+        draw();
+    }
+
+    private void draw() {
         batch.begin();
         background.draw(batch);
         logo.draw(batch);
-        logo.update(delta);
+        for (Star s: stars) {
+            s.draw(batch);
+        }
         batch.end();
+    }
 
+    private void update(float delta) {
+        logo.update(delta);
+        for (Star s: stars) {
+            s.update(delta);
+        }
     }
 
     @Override
@@ -47,6 +71,10 @@ public class MenuScreen extends BaseScreen{
         super.resize(worldBounds);
         background.resize(worldBounds);
         logo.resize(worldBounds);
+
+        for (Star s: stars) {
+            s.resize(worldBounds);
+        }
     }
 
     @Override
@@ -54,6 +82,7 @@ public class MenuScreen extends BaseScreen{
         super.dispose();
         bg.dispose();
         log.dispose();
+        atlas.dispose();
     }
 
 
