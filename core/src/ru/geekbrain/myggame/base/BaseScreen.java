@@ -133,7 +133,12 @@ public class BaseScreen implements Screen, InputProcessor {
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         touch.set(screenX, screenBounds.getHeight() - screenY);
         touch.mul(screenToWorld);
-//        logger.log(Level.SEVERE,"touchUp()");
+        touchUp(touch, pointer);
+        return false;
+    }
+
+    public boolean touchUp(Vector2 touch, int pointer) {
+        logger.log(Level.SEVERE, "x: " + touch.x + " y: " + touch.y);
         return false;
     }
 

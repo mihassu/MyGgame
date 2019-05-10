@@ -15,19 +15,31 @@ public abstract class ScaledTouchUpButton extends Sprite {
     }
 
     @Override
-    public void setHeightProportion(float height) {
-        super.setHeightProportion(height);
+    public boolean touchDown(Vector2 touch, int pointer) {
+        if (pressed || !isMe(touch)) {
+            return false;
+        }
+        this.pointer = pointer;
+        scale = PRESS_SCALE;
+        pressed = true;
+        return false;
     }
 
     @Override
-    public boolean touchDown(Vector2 touch, int button) {
-        return super.touchDown(touch, button);
+    public boolean touchUp(Vector2 touch, int pointer) {
+        if (this.pointer != pointer // если отпущен не тот палец который нажал кнопку
+                || !pressed) {
+            return false;
+        }
+
+        if (isMe(touch)) { //если палец отпущен именно над кнопкой
+            action();
+        }
+
+        pressed = false;
+        scale = 1f;
+        return false;
     }
 
-    @Override
-    public boolean touchUp(Vector2 touch, int button) {
-        return super.touchUp(touch, button);
-    }
-
-    abstract void action();
+    protected abstract void action();
 }
