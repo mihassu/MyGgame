@@ -10,8 +10,9 @@ public class Logo extends Sprite {
 
     private Vector2 v;
     private Vector2 buf;
+    private Vector2 bufV;
     private Vector2 touch;
-    private final float LEN = 0.01f;
+    private final float LEN = 0.5f;
 
     public Logo(TextureRegion region) {
         super(region);
@@ -19,6 +20,7 @@ public class Logo extends Sprite {
         v = new Vector2();
         touch = new Vector2();
         buf = new Vector2();
+        bufV = new Vector2();
     }
 
     @Override
@@ -31,8 +33,11 @@ public class Logo extends Sprite {
     @Override
     public void update(float delta) {
         buf.set(touch);
-        if (buf.sub(pos).len() > LEN) {
-            pos.add(v);
+        bufV.set(v);
+        bufV.scl(delta); // скалируем скорость на туже величину
+        if (buf.sub(pos).len() > bufV.len()) {
+//            pos.add(v);
+            pos.mulAdd(v, delta); //сложение и умножение на скаляр (delta)
         } else {
             pos.set(touch);
         }
