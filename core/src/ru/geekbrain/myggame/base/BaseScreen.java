@@ -20,8 +20,8 @@ public class BaseScreen implements Screen, InputProcessor {
     protected SpriteBatch batch;
     private Vector2 touch;
 
-    protected Rect worldBounds;
-    private Rect screenBounds;
+    protected Rect worldBounds; //игровой мир
+    private Rect screenBounds; //в пикселях
     private Rect glBounds; //прямоуголиник в координатах openGL размером 2fx2f
 
     private Matrix4 worldToGL;
@@ -61,7 +61,7 @@ public class BaseScreen implements Screen, InputProcessor {
         worldBounds.setWidth(2f * aspect);
 
         MatrixUtil.calcTransitionMatrix(worldToGL, worldBounds, glBounds); //считаем матрицу
-        batch.setProjectionMatrix(worldToGL); //передаем ее в batch
+        batch.setProjectionMatrix(worldToGL); //передаем ее в batch. Батчер сам выполняет умножение на эту матрицу
 
         MatrixUtil.calcTransitionMatrix(screenToWorld, screenBounds, worldBounds);
         resize(worldBounds);
@@ -118,16 +118,21 @@ public class BaseScreen implements Screen, InputProcessor {
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         logger.log(Level.SEVERE," x: " + screenX+ "px, y: " + screenY + "px" +
                 " pointer: " + pointer + " button: " + button);
-
         touch.set(screenX, screenBounds.getHeight() - screenY);
         touch.mul(screenToWorld);
+        touchDown(touch, pointer);
+        return false;
+    }
 
+    public boolean touchDown(Vector2 touch, int pointer) {
         logger.log(Level.SEVERE, "x: " + touch.x + " y: " + touch.y);
         return false;
     }
 
     @Override //кнопка мыши отпущена
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        touch.set(screenX, screenBounds.getHeight() - screenY);
+        touch.mul(screenToWorld);
 //        logger.log(Level.SEVERE,"touchUp()");
         return false;
     }
@@ -135,6 +140,9 @@ public class BaseScreen implements Screen, InputProcessor {
     @Override //нажатие мыши и протаскивание
     public boolean touchDragged(int screenX, int screenY, int pointer) {
         logger.log(Level.SEVERE,"touchDragged()");
+
+        touch.set(screenX, screenBounds.getHeight() - screenY);
+        touch.mul(screenToWorld);
         return false;
     }
 
