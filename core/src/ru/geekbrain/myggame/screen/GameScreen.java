@@ -1,53 +1,162 @@
 package ru.geekbrain.myggame.screen;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
 
 import ru.geekbrain.myggame.base.BaseScreen;
 import ru.geekbrain.myggame.math.Rect;
+import ru.geekbrain.myggame.pool.BulletPool;
+import ru.geekbrain.myggame.pool.EnemyShipsPool;
+import ru.geekbrain.myggame.sprite.Background;
+import ru.geekbrain.myggame.sprite.Bullet;
+import ru.geekbrain.myggame.sprite.ButtonLeft;
+import ru.geekbrain.myggame.sprite.ButtonRight;
+import ru.geekbrain.myggame.sprite.EnemyShip;
 import ru.geekbrain.myggame.sprite.Ship;
 import ru.geekbrain.myggame.sprite.Star;
 
 public class GameScreen extends BaseScreen {
 
+    private Texture bg;
+    private Background background;
+    private Star[] stars;
+    private final int STARS_COUNT = 100;
     private TextureAtlas atlas;
     private Ship ship;
+    private Texture buttonRightTexture;
+    private ButtonRight buttonRight;
+    private Texture buttonLeftTexture;
+    private ButtonLeft buttonLeft;
+    private BulletPool bulletPool;
+
+    private final float reloadInterval = 0.5f; //частота появления врагов
+    private float reloadTimer;
+    private EnemyShipsPool enemyShipsPool;
 
     @Override
     public void show() {
         super.show();
 
+        bg = new Texture("textures/bg.png");
+        background = new Background(new TextureRegion(bg));
+
         atlas = new TextureAtlas("textures/mainAtlas.tpack");
 
-        ship = new Ship(atlas);
+        stars = new Star[STARS_COUNT];
+        for (int i = 0; i < stars.length; i++) {
+            stars[i] = new Star(atlas);
+        }
+
+        bulletPool = new BulletPool();
+        ship = new Ship(atlas, bulletPool);
+        buttonRightTexture = new Texture("textures/arrow_right.png");
+        buttonRight = new ButtonRight(new TextureRegion(buttonRightTexture), ship);
+
+        buttonLeftTexture = new Texture("textures/arrow_left.png");
+        buttonLeft = new ButtonLeft(new TextureRegion(buttonLeftTexture), ship);
+
+        enemyShipsPool = new EnemyShipsPool();
     }
 
     @Override
     public void render(float delta) {
         super.render(delta);
         update(delta);
+        freeAllDestroyedSprites();
         draw();
     }
 
     private void draw() {
         batch.begin();
+        background.draw(batch);
+        for (Star s: stars) {
+            s.draw(batch);
+        }
         ship.draw(batch);
+        buttonRight.draw(batch);
+        buttonLeft.draw(batch);
+        bulletPool.drawActiveSprites(batch);
+        enemyShipsPool.drawActiveSprites(batch);
+
         batch.end();
     }
 
     private void update(float delta) {
+        for (Star s: stars) {
+            s.update(delta);
+        }
+        ship.update(delta);
+        bulletPool.updateActiveSprites(delta);
 
+        reloadTimer += delta;
+        if (reloadTimer >= reloadInterval) {
+            reloadTimer = 0f;
+            enemyAttack();
+        }
+        enemyShipsPool.updateActiveSprites(delta);
     }
 
 
     @Override
     public void resize(Rect worldBounds) {
         super.resize(worldBounds);
+        background.resize(worldBounds);
+        for (Star s: stars) {
+            s.resize(worldBounds);
+        }
         ship.resize(worldBounds);
+        buttonRight.resize(worldBounds);
+        buttonLeft.resize(worldBounds);
+    }
+
+    public void freeAllDestroyedSprites() {
+        bulletPool.freeAllDestroyedActiveSprites();
+        enemyShipsPool.freeAllDestroyedActiveSprites();
+    }
+
+    public void enemyAttack() {
+        EnemyShip enemyShip = enemyShipsPool.obtain();
+        enemyShip.set(atlas, new Vector2(0f, 1f), 0.2f, worldBounds);
     }
 
     @Override
     public void dispose() {
         super.dispose();
+        bg.dispose();
         atlas.dispose();
+        buttonRightTexture.dispose();
+        buttonLeftTexture.dispose();
+        bulletPool.dispose();
+        enemyShipsPool.dispose();
+    }
+
+    @Override
+    public boolean keyDown(int keycode) {
+        ship.keyDown(keycode);
+        return false;
+    }
+
+    @Override
+    public boolean keyUp(int keycode) {
+        ship.keyUp(keycode);
+        return false;
+    }
+
+    @Override
+    public boolean touchDown(Vector2 touch, int pointer) {
+        buttonRight.touchDown(touch, pointer);
+        buttonLeft.touchDown(touch, pointer);
+        ship.touchDown(touch, pointer);
+        return false;
+    }
+
+    @Override
+    public boolean touchUp(Vector2 touch, int pointer) {
+        buttonRight.touchUp(touch, pointer);
+        buttonLeft.touchUp(touch, pointer);
+        ship.touchUp(touch, pointer);
+        return false;
     }
 }

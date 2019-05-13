@@ -4,7 +4,7 @@ import com.badlogic.gdx.math.Vector2;
 
 public class Rect {
 
-    public final Vector2 pos = new Vector2(); //позиция по центру
+    public final Vector2 pos = new Vector2(); //позиция
     protected float halfWidth;
     protected float halfHeight;
 
@@ -20,6 +20,10 @@ public class Rect {
         pos.set(x, y);
         this.halfWidth = halfWidth;
         this.halfHeight = halfHeight;
+    }
+
+    public Vector2 getPos() {
+        return pos;
     }
 
     public float getHalfWidth() {
@@ -92,5 +96,7 @@ public class Rect {
     public boolean isOutside(Rect other) {
         return getLeft() > other.getRight() || getRight() < other.getLeft() || getBottom() > other.getTop() || getTop() < other.getBottom();
     }
+
+
 
 }

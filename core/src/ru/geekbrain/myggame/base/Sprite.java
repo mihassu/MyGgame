@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Vector2;
 import java.util.logging.Level;
 
 import ru.geekbrain.myggame.math.Rect;
+import ru.geekbrain.myggame.utils.Regions;
 
 public class Sprite extends Rect {
 
@@ -14,10 +15,18 @@ public class Sprite extends Rect {
     protected float scale = 1f;
     protected TextureRegion[] regions;
     protected int frame; //текущий кадр
+    private boolean isDestroed; //для пуль
+
+
+    public Sprite() {}
 
     public Sprite(TextureRegion region) {
         regions = new TextureRegion[1];
         regions[0] = region;
+    }
+
+    public Sprite(TextureRegion region, int rows, int cols, int frames) {
+        this.regions = Regions.split(region, rows, cols, frames); //разбиваем текстуру утилитой Regions
     }
 
     public void setHeightProportion(float height){
@@ -42,6 +51,10 @@ public class Sprite extends Rect {
         this.scale = scale;
     }
 
+    public boolean isDestroed() {
+        return isDestroed;
+    }
+
     public void draw(SpriteBatch batch) {
         batch.draw(regions[frame],
                 getLeft(), getBottom(), // позиция - левая нижняя точка
@@ -64,5 +77,13 @@ public class Sprite extends Rect {
     public boolean touchUp(Vector2 touch, int pointer) {
 
         return false;
+    }
+
+    public void destroy() {
+        isDestroed = true;
+    }
+
+    public void flushDesrtoy() {
+        isDestroed = false;
     }
 }
