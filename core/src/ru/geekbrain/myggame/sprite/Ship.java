@@ -1,6 +1,7 @@
 package ru.geekbrain.myggame.sprite;
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
@@ -26,15 +27,18 @@ public class Ship extends Sprite {
     private BulletPool bulletPool;
     private TextureRegion bulletRegion;
 
-    private final float reloadInterval = 0.5f; //частота пуль
+    private final float reloadInterval = 0.3f; //частота пуль
     private float reloadTimer;
 
-    public Ship(TextureAtlas atlas, BulletPool bulletPool) {
+    private Sound bulletSound;
+
+    public Ship(TextureAtlas atlas, BulletPool bulletPool, Sound bulletSound) {
         super(atlas.findRegion("main_ship"), 1, 2, 2);
         this.bulletPool = bulletPool;
         this.bulletRegion = atlas.findRegion("bulletMainShip");
         setHeightProportion(0.2f);
         v = new Vector2();
+        this.bulletSound = bulletSound;
     }
 
     @Override
@@ -118,7 +122,8 @@ public class Ship extends Sprite {
 
     public void shoot() {
         Bullet bullet = bulletPool.obtain();
-        bullet.set(this, bulletRegion, pos, bulletV, 0.03f, worldBounds, 1);
+        bullet.set(this, bulletRegion, pos, bulletV, 0.05f, worldBounds, 1);
+        bulletSound.play();
     }
 
     @Override
@@ -151,7 +156,7 @@ public class Ship extends Sprite {
 
     private void moveLeft() {
         v.set(vLeft);
-    }
+    } //можно v.set(vRight).rotate(180)
 
     private void moveUp() {
         v.set(vUp);

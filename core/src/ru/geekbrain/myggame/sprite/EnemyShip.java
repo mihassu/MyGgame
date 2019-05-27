@@ -12,7 +12,7 @@ import ru.geekbrain.myggame.utils.Regions;
 public class EnemyShip extends Sprite {
 
     private Rect worldBounds;
-    private Vector2 v = new Vector2();
+    private Vector2 v;
 
     public EnemyShip() {
         regions = new TextureRegion[2];

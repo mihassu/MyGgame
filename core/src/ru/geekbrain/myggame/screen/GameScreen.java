@@ -1,5 +1,8 @@
 package ru.geekbrain.myggame.screen;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -31,9 +34,12 @@ public class GameScreen extends BaseScreen {
     private ButtonLeft buttonLeft;
     private BulletPool bulletPool;
 
-    private final float reloadInterval = 0.5f; //частота появления врагов
+    private final float reloadInterval = 0.25f; //частота появления врагов
     private float reloadTimer;
     private EnemyShipsPool enemyShipsPool;
+
+    private Music music;
+    private Sound bulletSound;
 
     @Override
     public void show() {
@@ -50,7 +56,10 @@ public class GameScreen extends BaseScreen {
         }
 
         bulletPool = new BulletPool();
-        ship = new Ship(atlas, bulletPool);
+
+        bulletSound = Gdx.audio.newSound(Gdx.files.internal("sounds/laser.wav"));
+
+        ship = new Ship(atlas, bulletPool, bulletSound);
         buttonRightTexture = new Texture("textures/arrow_right.png");
         buttonRight = new ButtonRight(new TextureRegion(buttonRightTexture), ship);
 
@@ -58,6 +67,11 @@ public class GameScreen extends BaseScreen {
         buttonLeft = new ButtonLeft(new TextureRegion(buttonLeftTexture), ship);
 
         enemyShipsPool = new EnemyShipsPool();
+
+        music = Gdx.audio.newMusic(Gdx.files.internal("sounds/music.mp3"));
+        music.setLooping(true);
+        music.play();
+
     }
 
     @Override
@@ -96,6 +110,15 @@ public class GameScreen extends BaseScreen {
             enemyAttack();
         }
         enemyShipsPool.updateActiveSprites(delta);
+
+        for (int i = 0; i < enemyShipsPool.getActiveObjects().size(); i++) {
+            for (int j = 0; j < bulletPool.getActiveObjects().size(); j++) {
+                if(enemyShipsPool.getActiveObjects().get(i).isMe(bulletPool.getActiveObjects().get(j).pos)) {
+                    enemyShipsPool.getActiveObjects().get(i).destroy();
+                    bulletPool.getActiveObjects().get(j).destroy();
+                }
+            }
+        }
     }
 
 
@@ -130,6 +153,8 @@ public class GameScreen extends BaseScreen {
         buttonLeftTexture.dispose();
         bulletPool.dispose();
         enemyShipsPool.dispose();
+        music.dispose();
+        bulletSound.dispose();
     }
 
     @Override
