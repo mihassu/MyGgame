@@ -13,12 +13,11 @@ import ru.geekbrain.myggame.math.Rect;
 import ru.geekbrain.myggame.pool.BulletPool;
 import ru.geekbrain.myggame.pool.EnemyShipsPool;
 import ru.geekbrain.myggame.sprite.Background;
-import ru.geekbrain.myggame.sprite.Bullet;
 import ru.geekbrain.myggame.sprite.ButtonLeft;
 import ru.geekbrain.myggame.sprite.ButtonRight;
-import ru.geekbrain.myggame.sprite.EnemyShip;
 import ru.geekbrain.myggame.sprite.Ship;
 import ru.geekbrain.myggame.sprite.Star;
+import ru.geekbrain.myggame.utils.EnemyShipsGenerator;
 
 public class GameScreen extends BaseScreen {
 
@@ -34,12 +33,13 @@ public class GameScreen extends BaseScreen {
     private ButtonLeft buttonLeft;
     private BulletPool bulletPool;
 
-    private final float reloadInterval = 0.25f; //частота появления врагов
-    private float reloadTimer;
     private EnemyShipsPool enemyShipsPool;
 
     private Music music;
     private Sound bulletSound;
+    private Sound enemyBulletSound;
+
+    private EnemyShipsGenerator enemyShipsGenerator;
 
     @Override
     public void show() {
@@ -55,9 +55,11 @@ public class GameScreen extends BaseScreen {
             stars[i] = new Star(atlas);
         }
 
+
         bulletPool = new BulletPool();
 
         bulletSound = Gdx.audio.newSound(Gdx.files.internal("sounds/laser.wav"));
+        enemyBulletSound = Gdx.audio.newSound(Gdx.files.internal("sounds/bullet.wav"));
 
         ship = new Ship(atlas, bulletPool, bulletSound);
         buttonRightTexture = new Texture("textures/arrow_right.png");
@@ -66,7 +68,9 @@ public class GameScreen extends BaseScreen {
         buttonLeftTexture = new Texture("textures/arrow_left.png");
         buttonLeft = new ButtonLeft(new TextureRegion(buttonLeftTexture), ship);
 
-        enemyShipsPool = new EnemyShipsPool();
+        enemyShipsPool = new EnemyShipsPool(bulletPool, enemyBulletSound, worldBounds, ship);
+
+        enemyShipsGenerator = new EnemyShipsGenerator(atlas, enemyShipsPool, worldBounds);
 
         music = Gdx.audio.newMusic(Gdx.files.internal("sounds/music.mp3"));
         music.setLooping(true);
@@ -103,14 +107,18 @@ public class GameScreen extends BaseScreen {
         }
         ship.update(delta);
         bulletPool.updateActiveSprites(delta);
-
-        reloadTimer += delta;
-        if (reloadTimer >= reloadInterval) {
-            reloadTimer = 0f;
-            enemyAttack();
-        }
         enemyShipsPool.updateActiveSprites(delta);
+        enemyShipsGenerator.generate(delta);
 
+
+//        reloadTimer += delta;
+//        if (reloadTimer >= reloadInterval) {
+//            reloadTimer = 0f;
+//            enemyAttack();
+//        }
+
+
+        //попадание пулей во врагов
         for (int i = 0; i < enemyShipsPool.getActiveObjects().size(); i++) {
             for (int j = 0; j < bulletPool.getActiveObjects().size(); j++) {
                 if(enemyShipsPool.getActiveObjects().get(i).isMe(bulletPool.getActiveObjects().get(j).pos)) {
@@ -139,10 +147,10 @@ public class GameScreen extends BaseScreen {
         enemyShipsPool.freeAllDestroyedActiveSprites();
     }
 
-    public void enemyAttack() {
-        EnemyShip enemyShip = enemyShipsPool.obtain();
-        enemyShip.set(atlas, new Vector2(0f, 1f), 0.2f, worldBounds);
-    }
+//    public void enemyAttack() {
+//        EnemyShip enemyShip = enemyShipsPool.obtain();
+//        enemyShip.set( new Vector2(0f, 1f), new Vector2(Rnd.nextFloat(-0.5f, 0.5f), Rnd.nextFloat(-0.5f, -0.1f)));
+//    }
 
     @Override
     public void dispose() {
@@ -155,6 +163,7 @@ public class GameScreen extends BaseScreen {
         enemyShipsPool.dispose();
         music.dispose();
         bulletSound.dispose();
+        enemyBulletSound.dispose();
     }
 
     @Override

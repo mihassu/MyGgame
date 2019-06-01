@@ -15,9 +15,14 @@ public class Regions {
     public static TextureRegion[] split(TextureRegion region, int rows, int cols, int frames) {
         if(region == null) throw new RuntimeException("Split null region");
         TextureRegion[] regions = new TextureRegion[frames];
+
+        //ширину переданной текстуры делим на количество столбцов, получаем ширину одного кадра
         int tileWidth = region.getRegionWidth() / cols;
+
+        //высоту переданной текстуры делим на количество строк, получаем высоту одного кадра
         int tileHeight = region.getRegionHeight() / rows;
 
+        //проходим по переданной текстуре и вырезаем кадры
         int frame = 0;
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
