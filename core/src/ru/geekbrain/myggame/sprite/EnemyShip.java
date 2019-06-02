@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Vector2;
 import ru.geekbrain.myggame.base.MainShip;
 import ru.geekbrain.myggame.math.Rect;
 import ru.geekbrain.myggame.pool.BulletPool;
+import ru.geekbrain.myggame.pool.ExplosionsPool;
 
 public class EnemyShip extends MainShip {
 
@@ -16,11 +17,14 @@ public class EnemyShip extends MainShip {
     private State state;
     private final Vector2 descentV = new Vector2(0, -0.5f); //скорость врага за экраном
 
-    public EnemyShip(BulletPool bulletPool, Sound enemyBulletSound, Rect worldBounds, Ship ship) {
+    public EnemyShip(BulletPool bulletPool, Sound enemyBulletSound, Rect worldBounds, Ship ship,
+                     ExplosionsPool explosionsPool) {
         this.bulletPool = bulletPool;
         this.bulletSound = enemyBulletSound;
         this.ship = ship;
         this.worldBounds = worldBounds;
+        this.explosionsPool = explosionsPool;
+//        this.explosionSound = explosionSound;
     }
 
 //    public EnemyShip(TextureAtlas atlas, EnemyBulletPool enemyBulletPool, Sound bulletSound, Rect worldBounds) {
@@ -100,7 +104,16 @@ public class EnemyShip extends MainShip {
 
         //уничтожить корабль врагов когда он вышел за границы экрана
         if(isOutside(worldBounds)) {
-            destroy();
+            hide();
+//            destroy();
         }
+    }
+
+    //чтобы пуля долетала до середины корабля
+    public boolean isBulletCollision(Rect bullet) {
+        return !(bullet.getRight() < getLeft() ||
+                bullet.getLeft() > getRight() ||
+                bullet.getBottom() > getTop() ||
+                bullet.getTop() < pos.y);
     }
 }

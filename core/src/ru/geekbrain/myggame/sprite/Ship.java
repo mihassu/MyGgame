@@ -3,19 +3,14 @@ package ru.geekbrain.myggame.sprite;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
 import ru.geekbrain.myggame.base.MainShip;
-import ru.geekbrain.myggame.base.Sprite;
 import ru.geekbrain.myggame.math.Rect;
 import ru.geekbrain.myggame.pool.BulletPool;
+import ru.geekbrain.myggame.pool.ExplosionsPool;
 
 public class Ship extends MainShip {
-
-    //private Vector2 v;
-    //private Rect worldBounds;
-    //private Vector2 bulletV = new Vector2(0, 1f); //скорость пули
 
     private final Vector2 vUp = new Vector2(0,1);
     private final Vector2 vDown = new Vector2(0,-1);
@@ -25,24 +20,19 @@ public class Ship extends MainShip {
     private boolean pressedRight;
     private boolean pressedLeft;
 
-    //private BulletPool bulletPool;
-    //private TextureRegion bulletRegion;
 
-    //private final float reloadInterval = 0.3f; //частота пуль
-    //private float reloadTimer;
-
-    //private Sound bulletSound;
-
-    public Ship(TextureAtlas atlas, BulletPool bulletPool, Sound bulletSound) {
+    public Ship(TextureAtlas atlas, BulletPool bulletPool, Sound bulletSound, ExplosionsPool explosionsPool) {
         super(atlas.findRegion("main_ship"), 1, 2, 2);
         this.bulletV.set(0, 1f); //скорость пули
-        this.bulletHeight = 0.05f; //размер пули
+        this.bulletHeight = 0.03f; //размер пули
         setHeightProportion(0.2f);
         this.damage = 1;
+        this.hp = 10;
         this.bulletPool = bulletPool;
         this.bulletRegion = atlas.findRegion("bulletMainShip");
         this.bulletSound = bulletSound;
-        this.reloadInterval = 0.4f; //частота пуль
+        this.reloadInterval = 0.5f; //частота пуль
+        this.explosionsPool = explosionsPool;
 
     }
 
@@ -65,6 +55,14 @@ public class Ship extends MainShip {
 
         if (getLeft() > worldBounds.getRight()) {setRight(worldBounds.getLeft());}
         if (getRight() < worldBounds.getLeft()) {setLeft(worldBounds.getRight());}
+    }
+
+    //чтобы пуля долетала до середины корабля
+    public boolean isBulletCollision(Rect bullet) {
+        return !(bullet.getRight() < getLeft() ||
+                bullet.getLeft() > getRight() ||
+                bullet.getBottom() > pos.y ||
+                bullet.getTop() < getBottom());
     }
 
     public boolean keyDown(int keycode) {

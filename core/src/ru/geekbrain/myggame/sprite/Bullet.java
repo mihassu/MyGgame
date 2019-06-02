@@ -28,9 +28,9 @@ public class Bullet extends Sprite {
     ) {
         this.owner = owner;
         this.regions[0] = region;
-        //this.pos.set(pos0);
-        this.pos.x = pos0.x;
-        this.pos.y = pos0.y - 0.2f;
+        this.pos.set(pos0);
+//        this.pos.x = pos0.x;
+//        this.pos.y = pos0.y - 0.2f;
         this.v.set(v0);
         setHeightProportion(height); //установить размер
         this.worldBounds = worldBounds;

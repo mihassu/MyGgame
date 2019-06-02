@@ -15,7 +15,7 @@ public class Sprite extends Rect {
     protected float scale = 1f;
     protected TextureRegion[] regions;
     protected int frame; //текущий кадр
-    private boolean isDestroed; //для пуль
+    private boolean isDestroed;
 
 
     public Sprite() {}
@@ -82,6 +82,8 @@ public class Sprite extends Rect {
     public void destroy() {
         isDestroed = true;
     }
+
+    public void hide() {isDestroed = true;}
 
     public void flushDesrtoy() {
         isDestroed = false;
