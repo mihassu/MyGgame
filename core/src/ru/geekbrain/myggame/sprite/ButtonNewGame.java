@@ -17,9 +17,8 @@ public class ButtonNewGame extends ScaledTouchUpButton {
 
     @Override
     protected void action() {
-        gameScreen.setState();
         gameScreen.refreshGameScreen();
-        ship.setHp(10);
+        ship.setHp(ship.SHIP_HP);
     }
 
     public ButtonNewGame(TextureAtlas atlas, Rect worldBounds, GameScreen gameScreen) {
@@ -41,15 +40,4 @@ public class ButtonNewGame extends ScaledTouchUpButton {
 
     }
 
-//    @Override
-//    public boolean touchDown(Vector2 touch, int pointer) {
-//        if (isMe(touch)) {
-//            gameScreen.setState();
-//            gameScreen.refreshGameScreen();
-//            ship.setHp(10);
-//        }
-//
-//        return false;
-//
-//    }
 }

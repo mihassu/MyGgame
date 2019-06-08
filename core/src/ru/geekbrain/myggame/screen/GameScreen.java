@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Align;
 
 import java.util.List;
 
@@ -25,8 +26,13 @@ import ru.geekbrain.myggame.sprite.GameOverText;
 import ru.geekbrain.myggame.sprite.Ship;
 import ru.geekbrain.myggame.sprite.Star;
 import ru.geekbrain.myggame.utils.EnemyShipsGenerator;
+import ru.geekbrain.myggame.utils.Font;
 
 public class GameScreen extends BaseScreen {
+
+    public static final String FRAGS = "Frags: ";
+    public static final String LEVEL = "Level: ";
+
 
     private enum State {PLAYING, PAUSE, GAME_OVER}
 
@@ -43,6 +49,10 @@ public class GameScreen extends BaseScreen {
     private Texture buttonLeftTexture;
     private ButtonLeft buttonLeft;
     private BulletPool bulletPool;
+    private int frags = 0;
+    private StringBuilder stringBuilderFrags;
+    private StringBuilder stringBuilderHp;
+    private StringBuilder stringBuilderLevel;
 
     private GameOverText gameOverText;
     private ButtonNewGame buttonNewGame;
@@ -56,6 +66,8 @@ public class GameScreen extends BaseScreen {
     private Sound explosionSound;
 
     private EnemyShipsGenerator enemyShipsGenerator;
+
+    private Font font;
 
     @Override
     public void show() {
@@ -97,6 +109,12 @@ public class GameScreen extends BaseScreen {
         gameOverText = new GameOverText(atlas);
         buttonNewGame = new ButtonNewGame(atlas, worldBounds, this);
 
+        font = new Font("font/font.fnt", "font/font.png");
+        font.setFontSize(0.05f);
+        stringBuilderFrags = new StringBuilder();
+        stringBuilderHp = new StringBuilder();
+        stringBuilderLevel = new StringBuilder();
+
         state = State.PLAYING;
     }
 
@@ -106,10 +124,6 @@ public class GameScreen extends BaseScreen {
         update(delta);
         freeAllDestroyedSprites();
         draw();
-    }
-
-    public void setState() {
-        this.state = State.PLAYING;
     }
 
     public Ship getShip() {
@@ -123,7 +137,7 @@ public class GameScreen extends BaseScreen {
             s.draw(batch);
         }
 
-        if(state == State.PLAYING) {
+        if (state == State.PLAYING) {
             ship.draw(batch);
             bulletPool.drawActiveSprites(batch);
             enemyShipsPool.drawActiveSprites(batch);
@@ -136,10 +150,24 @@ public class GameScreen extends BaseScreen {
             buttonNewGame.draw(batch);
         }
 
-
         explosionsPool.drawActiveSprites(batch);
+        printInfo();
         batch.end();
     }
+
+    //Вывод текста
+    private void printInfo() {
+//        font.draw(batch, "Frags: " + frags, worldBounds.getLeft(), worldBounds.getTop()); //так нельзя!!!
+        stringBuilderFrags.setLength(0); //обнулить stringBuilderFrags
+        font.draw(batch, stringBuilderFrags.append(FRAGS).append(frags), worldBounds.getLeft(), worldBounds.getTop());
+
+        stringBuilderHp.setLength(0);
+        font.draw(batch, stringBuilderHp.append(ship.getHp()), ship.getPos().x + 0.1f, ship.getPos().y);
+
+        stringBuilderLevel.setLength(0);
+        font.draw(batch, stringBuilderLevel.append(LEVEL).append(enemyShipsGenerator.getStage()), worldBounds.getRight(), worldBounds.getTop(), Align.right);
+    }
+
 
     private void update(float delta) {
         for (Star s : stars) {
@@ -148,9 +176,9 @@ public class GameScreen extends BaseScreen {
 
         explosionsPool.updateActiveSprites(delta);
 
-        if(state == State.PLAYING) {
+        if (state == State.PLAYING) {
             ship.update(delta);
-            enemyShipsGenerator.generate(delta);
+            enemyShipsGenerator.generate(delta, frags);
             bulletPool.updateActiveSprites(delta);
             enemyShipsPool.updateActiveSprites(delta);
 
@@ -202,31 +230,28 @@ public class GameScreen extends BaseScreen {
         List<EnemyShip> enemyShips = enemyShipsPool.getActiveObjects();
         List<Bullet> bullets = bulletPool.getActiveObjects();
 
-        for (EnemyShip enemyShip : enemyShips) {
+        if (ship.getHp() <= 0) {
+            ship.destroy();
+            state = State.GAME_OVER;
+        }
 
-            //проверка что корабль столкнулся с врагом
-            if (enemyShip.isMe(ship.pos)) {
-                if (ship.getHp() <= 0) {
-                    ship.destroy();
-                    state = State.GAME_OVER;
-                }
 
-                enemyShip.destroy();
-                ship.damage(1);
-                explosionSound.play();
+        for (Bullet bullet : bullets) {
+
+            //если пуля врага попала по кораблю
+            if (ship.isBulletCollision(bullet) && !ship.getClass().getName().equals(bullet.getOwner().getClass().getName())) {
+                bullet.destroy();
+                ship.damage(bullet.getDamage());
             }
 
-            for (Bullet bullet : bullets) {
+            for (EnemyShip enemyShip : enemyShips) {
 
-                //если пуля врага попала по кораблю
-                if (ship.isBulletCollision(bullet) && !ship.getClass().getName().equals(bullet.getOwner().getClass().getName())) {
-                    if (ship.getHp() <= 0) {
-                        ship.destroy();
-                        state = State.GAME_OVER;
-                    }
-
-                    ship.damage(1);
-                    bullet.destroy();
+                //проверка что корабль столкнулся с врагом
+                if (enemyShip.isMe(ship.pos)) {
+                    enemyShip.destroy();
+                    frags++;
+                    ship.damage(enemyShip.getDamage());
+                    explosionSound.play();
                 }
 
 
@@ -240,6 +265,7 @@ public class GameScreen extends BaseScreen {
                     //если у врага не осталось hp то он уничтожается
                     if (enemyShip.getHp() <= 0) {
                         enemyShip.destroy();
+                        frags++;
                         bullet.destroy();
 
                     } else { //иначе пуля уничтожается а у врага отнимается hp
@@ -249,21 +275,22 @@ public class GameScreen extends BaseScreen {
                 }
             }
         }
+
     }
 
+    //Новая игра
     public void refreshGameScreen() {
-        List<EnemyShip> enemyShips = enemyShipsPool.getActiveObjects();
-        List<Bullet> bullets = bulletPool.getActiveObjects();
-
-        for (EnemyShip enemyShip : enemyShips) {
-            enemyShip.hide();
-        }
-
-        for (Bullet bullet : bullets) {
-            bullet.hide();
-        }
+        state = State.PLAYING;
+        bulletPool.freeAllActiveSprites();
+        enemyShipsPool.freeAllActiveSprites();
+        ship.refreshShip();
+        frags = 0;
+        enemyShipsGenerator.setStage(1);
+        enemyShipsGenerator.setGenerateInterval(2f);
     }
 
+
+    //Не забывать!!!!!!!!!!!!!!!!!!
     @Override
     public void dispose() {
         super.dispose();
@@ -278,6 +305,7 @@ public class GameScreen extends BaseScreen {
         enemyBulletSound.dispose();
         explosionSound.dispose();
         explosionsPool.dispose();
+        font.dispose();
     }
 
     @Override

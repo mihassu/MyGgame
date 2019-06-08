@@ -18,24 +18,25 @@ public class EnemyShipsGenerator {
     private static final float ENEMY_SMALL_RELOAD_INTERVAL = 3f;
     private static final int ENEMY_SMALL_HP = 1;
 
-    private static final float ENEMY_MEDIUM_HEIGHT = 0.15f;
+    private static final float ENEMY_MEDIUM_HEIGHT = 0.25f;
     private static final float ENEMY_MEDIUM_BULLET_HEIGHT = 0.03f;
     private static final float ENEMY_MEDIUM_BULLET_VY = -0.4f;
-    private static final int ENEMY_MEDIUM_DAMAGE = 5;
+    private static final int ENEMY_MEDIUM_DAMAGE = 2;
     private static final float ENEMY_MEDIUM_RELOAD_INTERVAL = 4f;
     private static final int ENEMY_MEDIUM_HP = 2;
 
-    private static final float ENEMY_BIG_HEIGHT = 0.2f;
+    private static final float ENEMY_BIG_HEIGHT = 0.4f;
     private static final float ENEMY_BIG_BULLET_HEIGHT = 0.05f;
     private static final float ENEMY_BIG_BULLET_VY = -0.3f;
-    private static final int ENEMY_BIG_DAMAGE = 10;
+    private static final int ENEMY_BIG_DAMAGE = 5;
     private static final float ENEMY_BIG_RELOAD_INTERVAL = 2f;
-    private static final int ENEMY_BIG_HP = 3;
+    private static final int ENEMY_BIG_HP = 5;
 
     private Rect worldBounds;
 
-    private float generateInterval = 1f; //частота появления врагов
+    private float generateInterval = 2f; //частота появления врагов
     private float generateTimer;
+    private int stage = 1;
 
     private TextureRegion[] enemySmallRegion; // текстура врагов
     private TextureRegion[] enemyMediumRegion; // текстура врагов
@@ -66,7 +67,17 @@ public class EnemyShipsGenerator {
         this.worldBounds = worldBounds;
     }
 
-    public void generate(float delta) {
+    public void generate(float delta, int frags) {
+
+        stage = frags / 10 + 1; //уровень возрастает на 1 через каждые 10 убитых врагов
+
+        switch (stage) {
+            case 2: generateInterval = 1.5f;
+            case 3: generateInterval = 1f;
+            case 4: generateInterval = 0.5f;
+
+        }
+
         generateTimer += delta;
         if (generateTimer >= generateInterval) {
             generateTimer = 0f;
@@ -115,5 +126,17 @@ public class EnemyShipsGenerator {
                     worldBounds.getRight() - enemyShip.getHalfWidth()); // позиция x появления врага
             enemyShip.setBottom(worldBounds.getTop()); // корабль появляется сверху за границей экрана
         }
+    }
+
+    public int getStage() {
+        return stage;
+    }
+
+    public void setStage(int stage) {
+        this.stage = stage;
+    }
+
+    public void setGenerateInterval(float generateInterval) {
+        this.generateInterval = generateInterval;
     }
 }

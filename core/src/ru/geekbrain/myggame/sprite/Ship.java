@@ -20,6 +20,8 @@ public class Ship extends MainShip {
     private boolean pressedRight;
     private boolean pressedLeft;
 
+    public static final int SHIP_HP = 20;
+
 
     public Ship(TextureAtlas atlas, BulletPool bulletPool, Sound bulletSound, ExplosionsPool explosionsPool) {
         super(atlas.findRegion("main_ship"), 1, 2, 2);
@@ -27,13 +29,19 @@ public class Ship extends MainShip {
         this.bulletHeight = 0.03f; //размер пули
         setHeightProportion(0.2f);
         this.damage = 1;
-        this.hp = 10;
+        this.hp = SHIP_HP;
         this.bulletPool = bulletPool;
         this.bulletRegion = atlas.findRegion("bulletMainShip");
         this.bulletSound = bulletSound;
-        this.reloadInterval = 0.5f; //частота пуль
+        this.reloadInterval = 0.2f; //частота пуль
         this.explosionsPool = explosionsPool;
 
+    }
+
+    public void refreshShip() {
+        flushDesrtoy();
+        hp = SHIP_HP;
+        pos.x = worldBounds.pos.x; //выравниваем по центру
     }
 
     @Override

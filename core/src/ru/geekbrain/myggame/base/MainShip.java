@@ -86,9 +86,10 @@ public class MainShip extends Sprite {
     }
 
     public void damage(int damage) {
+        this.hp -= damage;
         frame = 1; //переключаем кадр
         damageAnimateTimer = 0f;
-        this.hp -= damage;
+
     }
 
     @Override

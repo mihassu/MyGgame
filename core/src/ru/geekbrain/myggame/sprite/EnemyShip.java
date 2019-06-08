@@ -24,24 +24,8 @@ public class EnemyShip extends MainShip {
         this.ship = ship;
         this.worldBounds = worldBounds;
         this.explosionsPool = explosionsPool;
-//        this.explosionSound = explosionSound;
     }
 
-//    public EnemyShip(TextureAtlas atlas, EnemyBulletPool enemyBulletPool, Sound bulletSound, Rect worldBounds) {
-//        super(atlas.findRegion("enemy2"), 1 , 2, 2);
-//
-//        this.enemyBulletPool = enemyBulletPool;
-//        this.bulletV.set(0, -1f); //скорость пули
-//        this.bulletHeight = 0.05f; //размер пули
-//        this.bulletRegion = atlas.findRegion("bulletEnemy");
-//        setHeightProportion(0.2f); //установить размер
-//        this.damage = 1;
-//        //this.bulletPool = bulletPool;
-//        this.bulletSound = bulletSound;
-//        this.reloadInterval = 0.3f; //частота пуль
-//
-//        this.worldBounds = worldBounds;
-//    }
 
     @Override
     public void resize(Rect worldBounds) {
@@ -73,6 +57,7 @@ public class EnemyShip extends MainShip {
         this.v.set(descentV); //сначала присваиваем кораблю бОльшую скорость, пока он не выехал
         reloadTimer = reloadInterval; //чтобы корабль сразу стрелял
         state = State.DESCENT; //сначала присваиваем состояние "за экраном"
+        bulletSound.setVolume(1, 0f);
     }
 
 
