@@ -12,6 +12,12 @@ import ru.geekbrain.myggame.pool.ExplosionsPool;
 
 public class Ship extends MainShip {
 
+    private enum State {NORMAL, BONUS}
+    private State state = State.NORMAL;
+
+    private final float bonusInterval = 3f; //время действия бонуса
+    private float bonusTimer;
+
     private final Vector2 vUp = new Vector2(0,1);
     private final Vector2 vDown = new Vector2(0,-1);
     private final Vector2 vLeft = new Vector2(-1,0);
@@ -21,19 +27,23 @@ public class Ship extends MainShip {
     private boolean pressedLeft;
 
     public static final int SHIP_HP = 20;
+    public static final int SHIP_DAMAGE = 1;
+    public static final float SHIP_BULLET_HEIGHT = 0.03f;
+    public static final float SHIP_HEIGHT = 0.2f;
+    public static final float SHIP_BULLET_INTERVAL = 0.2f;
 
 
     public Ship(TextureAtlas atlas, BulletPool bulletPool, Sound bulletSound, ExplosionsPool explosionsPool) {
         super(atlas.findRegion("main_ship"), 1, 2, 2);
         this.bulletV.set(0, 1f); //скорость пули
-        this.bulletHeight = 0.03f; //размер пули
-        setHeightProportion(0.2f);
-        this.damage = 1;
+        this.bulletHeight = SHIP_BULLET_HEIGHT; //размер пули
+        setHeightProportion(SHIP_HEIGHT);
+        this.damage = SHIP_DAMAGE;
         this.hp = SHIP_HP;
         this.bulletPool = bulletPool;
         this.bulletRegion = atlas.findRegion("bulletMainShip");
         this.bulletSound = bulletSound;
-        this.reloadInterval = 0.2f; //частота пуль
+        this.reloadInterval = SHIP_BULLET_INTERVAL; //частота пуль
         this.explosionsPool = explosionsPool;
 
     }
@@ -42,6 +52,28 @@ public class Ship extends MainShip {
         flushDesrtoy();
         hp = SHIP_HP;
         pos.x = worldBounds.pos.x; //выравниваем по центру
+    }
+
+    public void shipUpgrade() {
+        state = State.BONUS;
+        this.damage = 5;
+        this.bulletHeight = 0.15f;
+        setHeightProportion(0.3f);
+        this.reloadInterval =  0.1f;
+    }
+
+    public void shipNormal(float delta) {
+
+        bonusTimer += delta;
+        if(bonusTimer >= bonusInterval) {
+            bonusTimer = 0f;
+            state = State.NORMAL;
+            this.damage = SHIP_DAMAGE;
+            this.bulletHeight = SHIP_BULLET_HEIGHT;
+            setHeightProportion(SHIP_HEIGHT);
+            this.reloadInterval = SHIP_BULLET_INTERVAL;
+        }
+
     }
 
     @Override
@@ -63,6 +95,10 @@ public class Ship extends MainShip {
 
         if (getLeft() > worldBounds.getRight()) {setRight(worldBounds.getLeft());}
         if (getRight() < worldBounds.getLeft()) {setLeft(worldBounds.getRight());}
+
+        if (state == State.BONUS) {
+            shipNormal(delta);
+        }
     }
 
     //чтобы пуля долетала до середины корабля

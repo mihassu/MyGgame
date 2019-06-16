@@ -16,6 +16,7 @@ import ru.geekbrain.myggame.math.Rect;
 import ru.geekbrain.myggame.pool.BulletPool;
 import ru.geekbrain.myggame.pool.EnemyShipsPool;
 import ru.geekbrain.myggame.pool.ExplosionsPool;
+import ru.geekbrain.myggame.pool.MegaBonusPool;
 import ru.geekbrain.myggame.sprite.Background;
 import ru.geekbrain.myggame.sprite.Bullet;
 import ru.geekbrain.myggame.sprite.ButtonLeft;
@@ -23,10 +24,12 @@ import ru.geekbrain.myggame.sprite.ButtonNewGame;
 import ru.geekbrain.myggame.sprite.ButtonRight;
 import ru.geekbrain.myggame.sprite.EnemyShip;
 import ru.geekbrain.myggame.sprite.GameOverText;
+import ru.geekbrain.myggame.sprite.MegaBonus;
 import ru.geekbrain.myggame.sprite.Ship;
 import ru.geekbrain.myggame.sprite.Star;
 import ru.geekbrain.myggame.utils.EnemyShipsGenerator;
 import ru.geekbrain.myggame.utils.Font;
+import ru.geekbrain.myggame.utils.MegaBonusGenerator;
 
 public class GameScreen extends BaseScreen {
 
@@ -66,6 +69,9 @@ public class GameScreen extends BaseScreen {
     private Sound explosionSound;
 
     private EnemyShipsGenerator enemyShipsGenerator;
+    private MegaBonusPool megaBonusPool;
+    private MegaBonusGenerator megaBonusGenerator;
+    private Texture megaBonusTexture;
 
     private Font font;
 
@@ -115,6 +121,11 @@ public class GameScreen extends BaseScreen {
         stringBuilderHp = new StringBuilder();
         stringBuilderLevel = new StringBuilder();
 
+
+        megaBonusTexture = new Texture("textures/bonus.png");
+        megaBonusPool = new MegaBonusPool(new TextureRegion(megaBonusTexture), worldBounds);
+        megaBonusGenerator = new MegaBonusGenerator(megaBonusPool, worldBounds);
+
         state = State.PLAYING;
     }
 
@@ -143,6 +154,7 @@ public class GameScreen extends BaseScreen {
             enemyShipsPool.drawActiveSprites(batch);
             buttonRight.draw(batch);
             buttonLeft.draw(batch);
+            megaBonusPool.drawActiveSprites(batch);
         }
 
         if (state == State.GAME_OVER) {
@@ -182,9 +194,14 @@ public class GameScreen extends BaseScreen {
             bulletPool.updateActiveSprites(delta);
             enemyShipsPool.updateActiveSprites(delta);
 
+            megaBonusGenerator.generate(delta);
+            megaBonusPool.updateActiveSprites(delta);
+
             //попадание пулей во врагов
             checkCollisions();
         }
+
+
     }
 
 
@@ -223,12 +240,15 @@ public class GameScreen extends BaseScreen {
         bulletPool.freeAllDestroyedActiveSprites();
         enemyShipsPool.freeAllDestroyedActiveSprites();
         explosionsPool.freeAllDestroyedActiveSprites();
+        megaBonusPool.freeAllDestroyedActiveSprites();
     }
 
     //попадание пулей во врагов
     public void checkCollisions() {
         List<EnemyShip> enemyShips = enemyShipsPool.getActiveObjects();
         List<Bullet> bullets = bulletPool.getActiveObjects();
+        List<MegaBonus> megaBonuses = megaBonusPool.getActiveObjects();
+
 
         if (ship.getHp() <= 0) {
             ship.destroy();
@@ -276,6 +296,14 @@ public class GameScreen extends BaseScreen {
             }
         }
 
+        //Взял бонус
+        for (MegaBonus megaBonus : megaBonuses) {
+            if (ship.isBulletCollision(megaBonus)) {
+                megaBonus.hide();
+                ship.shipUpgrade();
+            }
+        }
+
     }
 
     //Новая игра
@@ -283,6 +311,7 @@ public class GameScreen extends BaseScreen {
         state = State.PLAYING;
         bulletPool.freeAllActiveSprites();
         enemyShipsPool.freeAllActiveSprites();
+        megaBonusPool.freeAllActiveSprites();
         ship.refreshShip();
         frags = 0;
         enemyShipsGenerator.setStage(1);
@@ -306,6 +335,7 @@ public class GameScreen extends BaseScreen {
         explosionSound.dispose();
         explosionsPool.dispose();
         font.dispose();
+        megaBonusPool.dispose();
     }
 
     @Override

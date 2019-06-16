@@ -58,4 +58,6 @@ public class ButtonRight extends ScaledTouchUpButton {
         scale = 1f;
         return false;
     }
+
+
 }

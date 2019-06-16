@@ -148,6 +148,11 @@ public class BaseScreen implements Screen, InputProcessor {
 
         touch.set(screenX, screenBounds.getHeight() - screenY);
         touch.mul(screenToWorld);
+        touchDragged(touch, pointer);
+        return false;
+    }
+
+    public boolean touchDragged(Vector2 touch, int pointer) {
         return false;
     }
 
