@@ -27,6 +27,7 @@ import ru.geekbrain.myggame.sprite.GameOverText;
 import ru.geekbrain.myggame.sprite.MegaBonus;
 import ru.geekbrain.myggame.sprite.Ship;
 import ru.geekbrain.myggame.sprite.Star;
+import ru.geekbrain.myggame.sprite.TrackingStar;
 import ru.geekbrain.myggame.utils.EnemyShipsGenerator;
 import ru.geekbrain.myggame.utils.Font;
 import ru.geekbrain.myggame.utils.MegaBonusGenerator;
@@ -43,7 +44,7 @@ public class GameScreen extends BaseScreen {
 
     private Texture bg;
     private Background background;
-    private Star[] stars;
+    private TrackingStar[] stars;
     private final int STARS_COUNT = 100;
     private TextureAtlas atlas;
     private Ship ship;
@@ -84,10 +85,7 @@ public class GameScreen extends BaseScreen {
 
         atlas = new TextureAtlas("textures/mainAtlas.tpack");
 
-        stars = new Star[STARS_COUNT];
-        for (int i = 0; i < stars.length; i++) {
-            stars[i] = new Star(atlas);
-        }
+
 
         bulletPool = new BulletPool();
 
@@ -97,6 +95,12 @@ public class GameScreen extends BaseScreen {
 
         explosionsPool = new ExplosionsPool(atlas, explosionSound);
         ship = new Ship(atlas, bulletPool, bulletSound, explosionsPool);
+
+        stars = new TrackingStar[STARS_COUNT];
+        for (int i = 0; i < stars.length; i++) {
+            stars[i] = new TrackingStar(atlas, ship.getV());
+        }
+
         buttonRightTexture = new Texture("textures/arrow_right.png");
         buttonRight = new ButtonRight(new TextureRegion(buttonRightTexture), ship);
 

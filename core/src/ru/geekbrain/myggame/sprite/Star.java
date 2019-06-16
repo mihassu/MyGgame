@@ -10,7 +10,7 @@ import ru.geekbrain.myggame.math.Rnd;
 
 public class Star extends Sprite {
 
-    private Vector2 v;
+    protected Vector2 v;
     private Rect worldBounds;
 
     public Star(TextureAtlas atlas) {
@@ -35,6 +35,10 @@ public class Star extends Sprite {
     public void update(float delta) {
         super.update(delta);
         pos.mulAdd(v, delta);
+        checkBounds();
+    }
+
+    protected void checkBounds() {
         if (getTop() < worldBounds.getBottom()) {
             setBottom(worldBounds.getTop());
         }
@@ -44,6 +48,5 @@ public class Star extends Sprite {
         if (getLeft() > worldBounds.getRight()) {
             setRight(worldBounds.getLeft());
         }
-
     }
 }

@@ -43,6 +43,10 @@ public class MainShip extends Sprite {
         this.hp = hp;
     }
 
+    public Vector2 getV0() {
+        return v0;
+    }
+
     public Vector2 getV() {
         return v;
     }
